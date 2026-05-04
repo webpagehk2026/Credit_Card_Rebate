@@ -25,12 +25,10 @@
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; overflow-x: hidden; }
 
-        /* Header & Navigation */
         .header { background: var(--card-bg); text-align: center; padding: env(safe-area-inset-top) 0 0 0; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; display: flex; align-items: center; height: calc(44px + env(safe-area-inset-top)); }
         .menu-btn { background: none; border: none; font-size: 24px; color: var(--blue); padding: 10px 16px; cursor: pointer; }
         .header-title { flex: 1; font-weight: 600; font-size: 17px; margin-right: 48px; }
 
-        /* Sidebar Menu */
         .sidebar { position: fixed; top: 0; left: 0; width: 280px; height: 100%; background: var(--card-bg); z-index: 1000; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding-top: calc(20px + env(safe-area-inset-top)); box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
         .sidebar.open { transform: translateX(0); }
         .sidebar-title { padding: 0 20px 20px 20px; font-size: 22px; font-weight: 800; color: var(--blue); border-bottom: 1px solid var(--bg-color); }
@@ -41,19 +39,16 @@
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--modal-bg); z-index: 999; display: none; opacity: 0; transition: opacity 0.3s; }
         .overlay.show { display: block; opacity: 1; }
 
-        /* Main Container */
         .container { padding: 16px; padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
         .view-section { display: none; }
         .view-section.active { display: block; }
 
-        /* Form & Cards (iOS Right Alignment) */
         .form-group { background: var(--card-bg); border-radius: 10px; overflow: hidden; margin-bottom: 10px; }
         .form-row { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border-color); }
         .form-row:last-child { border-bottom: none; }
         .form-row label { width: 80px; font-size: 17px; flex-shrink: 0; color: var(--text-main); }
         
         .input-wrapper { flex: 1; display: flex; justify-content: flex-end; align-items: center; width: 100%; }
-        
         .form-row input, .form-row select { border: none; font-size: 17px; background: transparent; outline: none; text-align: right; color: var(--blue); appearance: none; -webkit-appearance: none; padding: 0; margin: 0; }
         .form-row select, .form-row input[type="date"] { width: auto; max-width: 100%; text-align-last: right; }
         .form-row input[type="number"], .form-row input[type="text"] { width: 100%; }
@@ -69,7 +64,6 @@
         .btn:active { opacity: 0.8; }
         .btn-cancel { background-color: var(--text-secondary); }
 
-        /* Results & Lists */
         .results-header { font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; text-align: center; }
         .card-result { background: var(--card-bg); border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; }
         .card-result:active { transform: scale(0.98); }
@@ -79,7 +73,6 @@
         .rebate-amount { color: var(--green); font-weight: bold; }
         .card-conditions { margin-top: 8px; font-size: 13px; color: var(--orange); background: rgba(255, 149, 0, 0.1); padding: 6px; border-radius: 6px; display: flex; gap: 4px; line-height: 1.4;}
 
-        /* History & Summary */
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .section-title { font-size: 20px; font-weight: 600; }
         .month-picker { border: none; background: #e5e5ea; padding: 6px 12px; border-radius: 8px; font-size: 15px; color: var(--blue); font-weight: bold; }
@@ -97,7 +90,6 @@
         .summary-total h2 { margin: 0; color: var(--green); font-size: 32px; }
         .summary-total p { margin: 5px 0 0 0; color: var(--text-secondary); font-size: 14px; }
 
-        /* Modal */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--modal-bg); z-index: 2000; justify-content: center; align-items: center; }
         .modal-content { background: var(--bg-color); width: 90%; max-width: 400px; border-radius: 14px; padding: 20px; }
         .modal-title { text-align: center; margin-bottom: 15px; font-weight: 600; font-size: 17px; }
@@ -105,13 +97,11 @@
 </head>
 <body>
 
-    <!-- 頂部導航 -->
     <div class="header">
         <button class="menu-btn" onclick="toggleMenu()">☰</button>
         <div class="header-title" id="headerTitle">💳 計算與記賬</div>
     </div>
 
-    <!-- 側邊選單 -->
     <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-title">卡優算<br><span style="font-size:12px; font-weight:normal; color:var(--text-secondary);">CardOptima HK</span></div>
@@ -137,7 +127,6 @@
                             <option value="dining">🍽️ 餐飲</option>
                             <option value="online">💻 網購</option>
                             <option value="supermarket">🛒 超市</option>
-                            <option value="overseas">✈️ 海外/外幣</option>
                             <option value="general">🛍️ 一般零售</option>
                         </select>
                     </div>
@@ -171,11 +160,10 @@
             </div>
             
             <div id="rateStatus" class="rate-status">獲取即時匯率中...</div>
-
             <button class="btn" onclick="calculate()">計算最佳信用卡</button>
 
             <div id="resultsArea" style="display: none; margin-bottom: 30px;">
-                <div class="results-header">👇 點擊你最終決定使用的信用卡以記賬</div>
+                <div class="results-header">👇 點擊你最終決定使用的信用卡以記賬<br>(已列出所有卡片排名)</div>
                 <div id="cardsList"></div>
             </div>
         </div>
@@ -241,63 +229,45 @@
 
 <script>
     let exchangeRates = { HKD: 1, CNY: 1.08, USD: 7.8, JPY: 0.052, EUR: 8.4, GBP: 9.8 };
-    const catNames = { dining: "餐飲", online: "網購", supermarket: "超市", overseas: "海外", general: "一般" };
+    const catNames = { dining: "餐飲", online: "網購", supermarket: "超市", general: "一般" };
 
-    // 刪除 EarnMORE 及 WakuWaku，保留其餘 9 張卡
+    // 資料庫 (已刪除 AEON 及 安信，更新 MMPOWER 條件)
     const cardsDB = [
         {
+            id: "hangseng_mmpower", name: "恒生 MMPOWER",
+            conditions: "每月累積滿$3,000方享網購5%及外幣4%。每月上限$500 +FUN Dollars。"
+        },
+        {
             id: "boc_chill", name: "中銀 Chill Card",
-            rates: { online: 0.05, overseas: 0.05, dining: 0.004, supermarket: 0.004, general: 0.004 },
-            conditions: "網購、海外、手機支付享5%。每月總額外回贈上限$150 (即簽$3,000)。",
-            limits: { type: "monthly_total_cap", amount: 3000, overflowRate: 0.004 }
+            conditions: "網購、海外享5%。每月總額外回贈上限$150。"
         },
         {
             id: "boc_sogo", name: "中銀 SOGO Visa 卡",
-            rates: { general: 0.05, dining: 0.05, supermarket: 0.05, online: 0.05, overseas: 0.05 },
-            conditions: "(假設使用手機支付) 享 5% 現金回贈。每月回贈上限為$100 (即簽$2,000)。",
-            limits: { type: "monthly_total_cap", amount: 2000, overflowRate: 0.004 }
+            conditions: "(假設手機支付) 享 5% 回贈。每月額外上限$100。"
         },
         {
             id: "citic_gba", name: "信銀大灣區雙幣卡",
-            rates: { general: 0.04, dining: 0.04, supermarket: 0.04, online: 0.04, overseas: 0.04 },
-            conditions: "【只限人民幣簽賬 / 雲閃付App】享 4% 現金回贈。每月額外回贈上限$150 (即簽$3,750)。",
-            limits: { type: "monthly_total_cap", amount: 3750, overflowRate: 0.004 }
-        },
-        {
-            id: "ccb_eye", name: "建行(亞洲) eye 信用卡",
-            rates: { online: 0.02, dining: 0.02, supermarket: 0.02, general: 0.02, overseas: 0.02 },
-            conditions: "(假設使用 Visa payWave/Apple Pay/網購) 享 2% 回贈 (5X積分)。每年額外回贈上限簽$75,000。",
-            limits: { type: "yearly_total_cap", amount: 75000, overflowRate: 0.004 }
-        },
-        {
-            id: "hsbc_vs", name: "HSBC Visa Signature",
-            rates: { dining: 0.036, online: 0.004, supermarket: 0.004, overseas: 0.004, general: 0.004 },
-            conditions: "假設『最紅自主獎賞』全投餐飲。餐飲享3.6% (9X獎賞錢)，全年上限簽$100,000。",
-            limits: { type: "yearly_cat_cap", category: "dining", amount: 100000, overflowRate: 0.004 }
-        },
-        {
-            id: "hsbc_everymile", name: "滙豐 EveryMile 信用卡",
-            rates: { dining: 0.02, online: 0.02, overseas: 0.02, supermarket: 0.02, general: 0.02 },
-            conditions: "基本簽賬$5/里(約2%)。指定日常消費(如交通/咖啡/串流)$2/里(約5%)。以1里=HK$0.1等值計算。",
-            limits: { type: "none" }
-        },
-        {
-            id: "scb_cathay", name: "渣打國泰 Mastercard",
-            rates: { dining: 0.025, online: 0.025, overseas: 0.025, supermarket: 0.0167, general: 0.0167 },
-            conditions: "食肆/網上/海外$4/里(約2.5%)，其他$6/里(約1.67%)。以1里=HK$0.1等值計算。",
-            limits: { type: "none" }
-        },
-        {
-            id: "hangseng_mmpower", name: "恒生 MMPOWER",
-            rates: { online: 0.05, dining: 0.05, overseas: 0.05, supermarket: 0.004, general: 0.004 },
-            conditions: "【需登記】每月需累積簽賬滿$5,000方享5%。每月額外回贈上限$500 (即簽$10,870)。",
-            limits: { type: "monthly_min_and_cap", minAmount: 5000, baseRate: 0.004, maxAmount: 10870 }
+            conditions: "【只限人民幣/雲閃付App】享 4% 回贈。每月額外上限$150。"
         },
         {
             id: "hsbc_red", name: "HSBC Red",
-            rates: { online: 0.04, dining: 0.01, supermarket: 0.01, overseas: 0.01, general: 0.01 },
-            conditions: "網購每月首$10,000享4%，其後1%。",
-            limits: { type: "monthly_cat_cap", category: "online", amount: 10000, overflowRate: 0.01 }
+            conditions: "網購每月首$10,000享4%，其後1%。"
+        },
+        {
+            id: "hsbc_vs", name: "HSBC Visa Signature",
+            conditions: "假設『最紅自主獎賞』全投餐飲(3.6%)。全年上限簽$100,000。"
+        },
+        {
+            id: "scb_cathay", name: "渣打國泰 Mastercard",
+            conditions: "食肆/網上/外幣$4/里(約2.5%)，其他$6/里(約1.67%)。"
+        },
+        {
+            id: "hsbc_everymile", name: "滙豐 EveryMile 信用卡",
+            conditions: "基本簽賬$5/里(約2%)。指定日常消費$2/里(約5%)。"
+        },
+        {
+            id: "ccb_eye", name: "建行(亞洲) eye 信用卡",
+            conditions: "(假設使用 payWave/Apple Pay/網購) 享 2% 回贈。每年上限簽$75,000。"
         }
     ];
 
@@ -390,118 +360,202 @@
         cardsDB.forEach(c => sel.options.add(new Option(c.name, c.id)));
     }
 
-    function getCardAccumulation(cardId, type, category = null, targetDate = new Date(), excludeTxId = null) {
+    function getMonthlyTransactions(cardId, targetDate, excludeTxId) {
         const history = JSON.parse(localStorage.getItem('hkCardHistory')) || [];
         const tMonth = targetDate.getMonth() + 1;
         const tYear = targetDate.getFullYear();
-
-        return history.filter(h => {
-            if (h.id === excludeTxId) return false;
-            if (h.cardId !== cardId) return false;
-            if (type === 'monthly' && (h.month !== tMonth || h.year !== tYear)) return false;
-            if (type === 'yearly' && h.year !== tYear) return false;
-            if (category && h.category !== category) return false;
-            return true;
-        }).reduce((sum, h) => sum + h.amountHKD, 0); 
+        return history.filter(h => h.cardId === cardId && h.id !== excludeTxId && h.month === tMonth && h.year === tYear);
     }
 
-    // 核心重構：絕對避免漏算，確保每個 if 分支都明確計算 expectedRebate
-    function calculateRebateForCard(card, cat, amountHKD, targetDate = new Date(), excludeTxId = null) {
-        let rate = card.rates[cat] || 0.004;
-        let note = "";
-        let expectedRebate = 0;
+    function getYearlyTransactions(cardId, targetDate, excludeTxId) {
+        const history = JSON.parse(localStorage.getItem('hkCardHistory')) || [];
+        const tYear = targetDate.getFullYear();
+        return history.filter(h => h.cardId === cardId && h.id !== excludeTxId && h.year === tYear);
+    }
 
-        if (card.limits.type === "monthly_cat_cap" && card.limits.category === cat) {
-            let catSpent = getCardAccumulation(card.id, 'monthly', cat, targetDate, excludeTxId);
-            if (catSpent >= card.limits.amount) {
-                rate = card.limits.overflowRate;
-                expectedRebate = amountHKD * rate;
-                note = `⚠️ 該月此類別已達上限，僅享基本回贈。`;
-            } else if (catSpent + amountHKD > card.limits.amount) {
-                let validAmt = card.limits.amount - catSpent;
-                expectedRebate = (validAmt * rate) + ((amountHKD - validAmt) * card.limits.overflowRate);
-                note = `⚠️ 簽此單後超出類別上限，部分按基本回贈計算。`;
+    // 全新獨立模組化精算引擎
+    function calculateRebateForCard(card, cat, amountHKD, currency, targetDate = new Date(), excludeTxId = null) {
+        let expectedRebate = 0;
+        let note = "";
+        let finalRate = 0;
+        
+        let monthTxs = getMonthlyTransactions(card.id, targetDate, excludeTxId);
+        let yearTxs = getYearlyTransactions(card.id, targetDate, excludeTxId);
+
+        if (card.id === "hangseng_mmpower") {
+            // MMPOWER: Online 5% (0.4% base + 4.6% extra), Foreign Currency 4% (0.4% base + 3.6% extra). Others 0.4%.
+            let monthTotal = monthTxs.reduce((sum, t) => sum + t.amountHKD, 0);
+            let extraEarned = monthTxs.reduce((sum, t) => {
+                let isFc = t.currency !== 'HKD';
+                if (t.category === 'online') return sum + (t.amountHKD * 0.046);
+                if (isFc) return sum + (t.amountHKD * 0.036);
+                return sum;
+            }, 0);
+
+            let isForeignCurrency = currency !== 'HKD';
+            let currentExtraRate = 0;
+            if (cat === 'online') currentExtraRate = 0.046;
+            else if (isForeignCurrency) currentExtraRate = 0.036;
+
+            if (monthTotal + amountHKD < 3000) {
+                expectedRebate = amountHKD * 0.004;
+                note = `❌ 本月累積僅 $${(monthTotal + amountHKD).toFixed(0)}，未達 $3,000 門檻。暫享基本回贈 0.4%。`;
             } else {
-                expectedRebate = amountHKD * rate;
-                note = `✅ 尚未達上限。`;
-            }
-        }
-        else if (card.limits.type === "yearly_total_cap") {
-            let yearSpent = getCardAccumulation(card.id, 'yearly', null, targetDate, excludeTxId);
-            if (yearSpent >= card.limits.amount) {
-                rate = card.limits.overflowRate;
-                expectedRebate = amountHKD * rate;
-                note = `⚠️ 已達年度上限，僅享基本回贈。`;
-            } else if (yearSpent + amountHKD > card.limits.amount) {
-                let validAmt = card.limits.amount - yearSpent;
-                expectedRebate = (validAmt * rate) + ((amountHKD - validAmt) * card.limits.overflowRate);
-                note = `⚠️ 簽此單後將超出年度上限，部分按基本回贈計算。`;
-            } else {
-                expectedRebate = amountHKD * rate;
-                note = `✅ 尚未達年度上限。`;
-            }
-        }
-        else if (card.limits.type === "yearly_cat_cap" && card.limits.category === cat) {
-            let catSpent = getCardAccumulation(card.id, 'yearly', cat, targetDate, excludeTxId);
-            if (catSpent >= card.limits.amount) {
-                rate = card.limits.overflowRate;
-                expectedRebate = amountHKD * rate;
-                note = "⚠️ 該類別已達全年上限，僅享基本回贈。";
-            } else if (catSpent + amountHKD > card.limits.amount) {
-                let validAmt = card.limits.amount - catSpent;
-                expectedRebate = (validAmt * rate) + ((amountHKD - validAmt) * card.limits.overflowRate);
-                note = "⚠️ 簽此單後超出全年上限，部分按基本回贈計算。";
-            } else {
-                expectedRebate = amountHKD * rate;
-                note = `✅ 尚未達全年上限。`;
-            }
-        }
-        else if (card.limits.type === "monthly_min_and_cap") {
-            let totalSpent = getCardAccumulation(card.id, 'monthly', null, targetDate, excludeTxId);
-            let newTotal = totalSpent + amountHKD;
-            if (newTotal < card.limits.minAmount) {
-                rate = card.limits.baseRate;
-                expectedRebate = amountHKD * rate;
-                note = `❌ 該月累積僅 $${newTotal.toFixed(0)}，未達 $${card.limits.minAmount} 門檻。`;
-            } else {
-                if (totalSpent >= card.limits.maxAmount) {
-                    rate = card.limits.baseRate;
-                    expectedRebate = amountHKD * rate;
-                    note = `⚠️ 該月總額外回贈已達上限。`;
-                } else if (newTotal > card.limits.maxAmount) {
-                    let validAmt = card.limits.maxAmount - totalSpent;
-                    expectedRebate = (validAmt * rate) + ((amountHKD - validAmt) * card.limits.baseRate);
-                    note = `✅ 達門檻但將超出上限，溢出部分為基本回贈。`;
+                let availableExtra = 500 - extraEarned;
+                if (availableExtra <= 0) {
+                    expectedRebate = amountHKD * 0.004;
+                    note = `⚠️ 本月 $500 +FUN Dollars 額外回贈已達上限，僅享 0.4% 基本回贈。`;
+                } else if (currentExtraRate === 0) {
+                    expectedRebate = amountHKD * 0.004;
+                    note = `✅ 達 $3,000 門檻，但此簽賬不屬網購/外幣，享 0.4% 基本回贈。`;
                 } else {
-                    expectedRebate = amountHKD * rate;
-                    note = `✅ 成功觸發高回贈條件！`;
+                    let maxExtraSpend = availableExtra / currentExtraRate;
+                    if (amountHKD > maxExtraSpend) {
+                        expectedRebate = (maxExtraSpend * (currentExtraRate + 0.004)) + ((amountHKD - maxExtraSpend) * 0.004);
+                        note = `✅ 達門檻，但將超出 $500 額外上限，部分金額享 0.4%。`;
+                    } else {
+                        expectedRebate = amountHKD * (currentExtraRate + 0.004);
+                        note = `✅ 已達 $3,000 門檻，盡享高回贈！`;
+                    }
                 }
             }
-        }
-        else if (card.limits.type === "monthly_total_cap") {
-            let monthSpent = getCardAccumulation(card.id, 'monthly', null, targetDate, excludeTxId);
-            if (monthSpent >= card.limits.amount) {
-                rate = card.limits.overflowRate;
-                expectedRebate = amountHKD * rate;
-                note = `⚠️ 該月總簽賬已達回贈上限，僅享基本回贈。`;
-            } else if (monthSpent + amountHKD > card.limits.amount) {
-                let validAmt = card.limits.amount - monthSpent;
-                expectedRebate = (validAmt * rate) + ((amountHKD - validAmt) * card.limits.overflowRate);
-                note = `⚠️ 簽此單後將超出每月回贈上限，部分金額按基本回贈計算。`;
-            } else {
-                expectedRebate = amountHKD * rate;
-                note = `✅ 尚未達上限。`;
-            }
-        }
-        else {
-            // 處理 limits: "none" (如 EveryMile/Cathay) 以及不符合上限類別的情況
-            expectedRebate = amountHKD * rate;
-            if (card.limits.type === "none") {
-                note = "✅ 無簽賬回贈上限";
-            }
+            return { rebate: expectedRebate, note: note };
         }
 
-        return { rebate: expectedRebate, note: note };
+        if (card.id === "boc_chill") {
+            let isFc = currency !== 'HKD';
+            let currentExtraRate = (cat === 'online' || isFc) ? 0.046 : 0;
+            let extraEarned = monthTxs.reduce((sum, t) => {
+                if (t.category === 'online' || t.currency !== 'HKD') return sum + (t.amountHKD * 0.046);
+                return sum;
+            }, 0);
+
+            if (currentExtraRate === 0) {
+                expectedRebate = amountHKD * 0.004;
+            } else {
+                let availableExtra = 150 - extraEarned;
+                if (availableExtra <= 0) {
+                    expectedRebate = amountHKD * 0.004;
+                    note = `⚠️ 本月 $150 額外回贈已達上限，僅享 0.4% 基本回贈。`;
+                } else {
+                    let maxExtraSpend = availableExtra / currentExtraRate;
+                    if (amountHKD > maxExtraSpend) {
+                        expectedRebate = (maxExtraSpend * (currentExtraRate + 0.004)) + ((amountHKD - maxExtraSpend) * 0.004);
+                        note = `⚠️ 簽此單後超出每月回贈上限，部分金額按 0.4% 計算。`;
+                    } else {
+                        expectedRebate = amountHKD * (currentExtraRate + 0.004);
+                    }
+                }
+            }
+            return { rebate: expectedRebate, note: note };
+        }
+
+        if (card.id === "boc_sogo") {
+            let extraEarned = monthTxs.reduce((sum, t) => sum + (t.amountHKD * 0.046), 0);
+            let availableExtra = 100 - extraEarned;
+            if (availableExtra <= 0) {
+                expectedRebate = amountHKD * 0.004;
+                note = `⚠️ 本月 $100 額外回贈已達上限，僅享 0.4% 基本回贈。`;
+            } else {
+                let maxExtraSpend = availableExtra / 0.046;
+                if (amountHKD > maxExtraSpend) {
+                    expectedRebate = (maxExtraSpend * 0.05) + ((amountHKD - maxExtraSpend) * 0.004);
+                    note = `⚠️ 簽此單後超出每月回贈上限，部分金額按 0.4% 計算。`;
+                } else {
+                    expectedRebate = amountHKD * 0.05;
+                }
+            }
+            return { rebate: expectedRebate, note: note };
+        }
+
+        if (card.id === "citic_gba") {
+            if (currency !== 'CNY') {
+                expectedRebate = amountHKD * 0.005;
+                note = "⚠️ 系統假設：如非使用雲閃付或人民幣結算，將不能享有4%回贈。";
+                return { rebate: expectedRebate, note: note };
+            }
+            let extraEarned = monthTxs.reduce((sum, t) => t.currency === 'CNY' ? sum + (t.amountHKD * 0.035) : sum, 0);
+            let availableExtra = 150 - extraEarned;
+            if (availableExtra <= 0) {
+                expectedRebate = amountHKD * 0.005;
+                note = `⚠️ 本月 $150 額外回贈已達上限，僅享 0.5% 回贈。`;
+            } else {
+                let maxExtraSpend = availableExtra / 0.035;
+                if (amountHKD > maxExtraSpend) {
+                    expectedRebate = (maxExtraSpend * 0.04) + ((amountHKD - maxExtraSpend) * 0.005);
+                    note = `⚠️ 簽此單後超出上限，部分金額按 0.5% 計算。`;
+                } else {
+                    expectedRebate = amountHKD * 0.04;
+                }
+            }
+            return { rebate: expectedRebate, note: note };
+        }
+
+        if (card.id === "ccb_eye") {
+            let yearSpent = yearTxs.reduce((sum, t) => sum + t.amountHKD, 0);
+            if (yearSpent >= 75000) {
+                expectedRebate = amountHKD * 0.004;
+                note = `⚠️ 已達年度 $75,000 上限，僅享 0.4% 基本回贈。`;
+            } else if (yearSpent + amountHKD > 75000) {
+                let validAmt = 75000 - yearSpent;
+                expectedRebate = (validAmt * 0.02) + ((amountHKD - validAmt) * 0.004);
+                note = `⚠️ 簽此單後將超出年度上限，部分按 0.4% 計算。`;
+            } else {
+                expectedRebate = amountHKD * 0.02;
+            }
+            return { rebate: expectedRebate, note: note };
+        }
+
+        if (card.id === "hsbc_vs") {
+            let catSpent = yearTxs.filter(t => t.category === 'dining').reduce((sum, t) => sum + t.amountHKD, 0);
+            if (cat === 'dining') {
+                if (catSpent >= 100000) {
+                    expectedRebate = amountHKD * 0.004;
+                    note = `⚠️ 餐飲已達年度 $100,000 上限，僅享 0.4% 基本回贈。`;
+                } else if (catSpent + amountHKD > 100000) {
+                    let validAmt = 100000 - catSpent;
+                    expectedRebate = (validAmt * 0.036) + ((amountHKD - validAmt) * 0.004);
+                    note = `⚠️ 簽此單後將超出年度上限，部分按 0.4% 計算。`;
+                } else {
+                    expectedRebate = amountHKD * 0.036;
+                }
+            } else {
+                expectedRebate = amountHKD * 0.004;
+            }
+            return { rebate: expectedRebate, note: note };
+        }
+
+        if (card.id === "hsbc_red") {
+            let catSpent = monthTxs.filter(t => t.category === 'online').reduce((sum, t) => sum + t.amountHKD, 0);
+            if (cat === 'online') {
+                if (catSpent >= 10000) {
+                    expectedRebate = amountHKD * 0.01;
+                    note = `⚠️ 網購已達每月 $10,000 上限，僅享 1% 回贈。`;
+                } else if (catSpent + amountHKD > 10000) {
+                    let validAmt = 10000 - catSpent;
+                    expectedRebate = (validAmt * 0.04) + ((amountHKD - validAmt) * 0.01);
+                    note = `⚠️ 簽此單後超出每月上限，部分按 1% 計算。`;
+                } else {
+                    expectedRebate = amountHKD * 0.04;
+                }
+            } else {
+                expectedRebate = amountHKD * 0.01;
+            }
+            return { rebate: expectedRebate, note: note };
+        }
+
+        if (card.id === "scb_cathay") {
+            let r = (cat === 'dining' || cat === 'online' || currency !== 'HKD') ? 0.025 : 0.0167;
+            expectedRebate = amountHKD * r;
+            return { rebate: expectedRebate, note: "" };
+        }
+
+        if (card.id === "hsbc_everymile") {
+            expectedRebate = amountHKD * 0.02; // 保守計算均為 2%
+            return { rebate: expectedRebate, note: "" };
+        }
+
+        return { rebate: 0, note: "" };
     }
 
     function calculate() {
@@ -509,7 +563,6 @@
         if (!dateStr) { alert("請選擇日期！"); return; }
         
         const txDateObj = new Date(dateStr + 'T12:00:00'); 
-        
         const cat = document.getElementById('category').value;
         const currency = document.getElementById('currency').value;
         const rawAmount = parseFloat(document.getElementById('amount').value);
@@ -529,12 +582,8 @@
         currentCalculationResults = [];
 
         cardsDB.forEach(card => {
-            let calc = calculateRebateForCard(card, cat, amountHKD, txDateObj);
+            let calc = calculateRebateForCard(card, cat, amountHKD, currency, txDateObj);
             
-            if (card.id === "citic_gba" && currency !== "CNY") {
-                calc.note = "⚠️ 如非使用雲閃付App或人民幣結算，將不能享有4%回贈。";
-            }
-
             currentCalculationResults.push({
                 ...card,
                 calculatedRebate: calc.rebate,
@@ -543,6 +592,7 @@
             });
         });
 
+        // 按回贈金額從高到低排序
         currentCalculationResults.sort((a, b) => b.calculatedRebate - a.calculatedRebate);
         renderResults();
     }
@@ -552,7 +602,7 @@
         container.innerHTML = "";
         document.getElementById('resultsArea').style.display = "block";
 
-        // 更新：不再使用 slice(0, 5) 隱藏卡片，直接顯示所有適用的卡片排名！
+        // 移除 slice 限制，顯示所有信用卡
         currentCalculationResults.forEach((res, index) => {
             const isBest = index === 0;
             const cardDiv = document.createElement('div');
@@ -571,7 +621,7 @@
             cardDiv.innerHTML = `
                 ${badgeHtml}
                 <div class="card-title">
-                    <span><span style="color:var(--text-secondary); font-size:14px;">#${index+1}</span> ${res.name}</span>
+                    <span>${index + 1}. ${res.name}</span>
                     <span class="rebate-amount">+$${res.calculatedRebate.toFixed(2)} (${res.finalRate}%)</span>
                 </div>
                 ${conditionsHtml}
@@ -726,7 +776,7 @@
             tx.details = newDetails;
             
             let cardObj = cardsDB.find(c => c.id === newCardId);
-            let calc = calculateRebateForCard(cardObj, tx.category, tx.amountHKD, txDateObj, tx.id);
+            let calc = calculateRebateForCard(cardObj, tx.category, tx.amountHKD, tx.currency, txDateObj, tx.id);
             tx.rebateEarned = calc.rebate;
 
             localStorage.setItem('hkCardHistory', JSON.stringify(history));
