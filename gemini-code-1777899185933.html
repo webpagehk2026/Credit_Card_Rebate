@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="CardOptima">
+    <title>卡優算 CardOptima - 信用卡回贈引擎</title>
+    <style>
+        :root {
+            --bg-color: #F2F2F7;
+            --card-bg: #FFFFFF;
+            --text-main: #000000;
+            --text-secondary: #8E8E93;
+            --blue: #007AFF;
+            --red: #FF3B30;
+            --green: #34C759;
+            --orange: #FF9500;
+            --highlight: #E5F1FF;
+            --border-color: #C6C6C8;
+            --modal-bg: rgba(0,0,0,0.5);
+        }
+
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; overflow-x: hidden; }
+
+        /* Header & Navigation */
+        .header { background: var(--card-bg); text-align: center; padding: env(safe-area-inset-top) 0 0 0; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; display: flex; align-items: center; height: calc(44px + env(safe-area-inset-top)); }
+        .menu-btn { background: none; border: none; font-size: 24px; color: var(--blue); padding: 10px 16px; cursor: pointer; }
+        .header-title { flex: 1; font-weight: 600; font-size: 17px; margin-right: 48px; }
+
+        /* Sidebar Menu */
+        .sidebar { position: fixed; top: 0; left: 0; width: 280px; height: 100%; background: var(--card-bg); z-index: 1000; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding-top: calc(20px + env(safe-area-inset-top)); box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
+        .sidebar.open { transform: translateX(0); }
+        .sidebar-title { padding: 0 20px 20px 20px; font-size: 22px; font-weight: 800; color: var(--blue); border-bottom: 1px solid var(--bg-color); }
+        .sidebar-item { padding: 16px 20px; font-size: 17px; color: var(--text-main); border-bottom: 1px solid var(--bg-color); display: flex; align-items: center; gap: 10px; cursor: pointer;}
+        .sidebar-item:active { background-color: var(--bg-color); }
+        .sidebar-item.active { color: var(--blue); font-weight: 600; background-color: var(--highlight); }
+        
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--modal-bg); z-index: 999; display: none; opacity: 0; transition: opacity 0.3s; }
+        .overlay.show { display: block; opacity: 1; }
+
+        /* Main Container */
+        .container { padding: 16px; padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+
+        /* Form & Cards */
+        .form-group { background: var(--card-bg); border-radius: 10px; overflow: hidden; margin-bottom: 10px; }
+        .form-row { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border-color); }
+        .form-row:last-child { border-bottom: none; }
+        .form-row label { width: 80px; font-size: 17px; }
+        .form-row input, .form-row select { flex: 1; border: none; font-size: 17px; background: transparent; outline: none; text-align: right; color: var(--blue); appearance: none; -webkit-appearance: none; }
+        .form-row input[type="date"] { font-family: inherit; }
+        .form-row input::placeholder { color: var(--text-secondary); opacity: 0.6; }
+        
+        .hkd-preview { text-align: right; font-size: 13px; color: var(--text-secondary); padding: 0 16px 12px; display: none; }
+        .rate-status { font-size: 12px; color: var(--text-secondary); text-align: center; margin-bottom: 20px; }
+        
+        .btn { background-color: var(--blue); color: white; width: 100%; padding: 14px; border-radius: 10px; border: none; font-size: 17px; font-weight: 600; margin-bottom: 20px; cursor: pointer; }
+        .btn:active { opacity: 0.8; }
+        .btn-cancel { background-color: var(--text-secondary); }
+
+        /* Results & Lists */
+        .results-header { font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; text-align: center; }
+        .card-result { background: var(--card-bg); border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; }
+        .card-result:active { transform: scale(0.98); }
+        .card-best { background: var(--highlight); border: 2px solid var(--blue); }
+        .badge { display: inline-block; background: var(--blue); color: white; font-size: 12px; padding: 2px 8px; border-radius: 10px; margin-bottom: 8px; font-weight: bold; }
+        .card-title { font-size: 17px; font-weight: 600; display: flex; justify-content: space-between; }
+        .rebate-amount { color: var(--green); font-weight: bold; }
+        .card-conditions { margin-top: 8px; font-size: 13px; color: var(--orange); background: rgba(255, 149, 0, 0.1); padding: 6px; border-radius: 6px; display: flex; gap: 4px; line-height: 1.4;}
+
+        /* History & Summary */
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .section-title { font-size: 20px; font-weight: 600; }
+        .month-picker { border: none; background: #e5e5ea; padding: 6px 12px; border-radius: 8px; font-size: 15px; color: var(--blue); font-weight: bold; }
+        .list-container { background: var(--card-bg); border-radius: 10px; overflow: hidden; }
+        .list-item { padding: 12px 16px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; font-size: 15px; }
+        .list-item:last-child { border-bottom: none; }
+        .item-info { flex: 1; }
+        .item-details-text { color: #666; font-size: 14px; margin-top: 2px;}
+        .item-sub { color: var(--text-secondary); font-size: 12px; margin-top: 4px; }
+        .item-card-tag { font-size: 12px; color: var(--blue); background: var(--highlight); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px; margin-right: 4px;}
+        .item-actions { display: flex; gap: 10px; margin-left: 10px; }
+        .action-btn { background: none; border: none; font-size: 18px; cursor: pointer; padding: 4px; }
+        
+        .summary-total { text-align: center; padding: 20px; background: var(--card-bg); border-radius: 10px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .summary-total h2 { margin: 0; color: var(--green); font-size: 32px; }
+        .summary-total p { margin: 5px 0 0 0; color: var(--text-secondary); font-size: 14px; }
+
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--modal-bg); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-content { background: var(--bg-color); width: 90%; max-width: 400px; border-radius: 14px; padding: 20px; }
+        .modal-title { text-align: center; margin-bottom: 15px; font-weight: 600; font-size: 17px; }
+    </style>
+</head>
+<body>
+
+    <!-- 頂部導航 -->
+    <div class="header">
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+        <div class="header-title" id="headerTitle">💳 計算與記賬</div>
+    </div>
+
+    <!-- 側邊選單 -->
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-title">卡優算<br><span style="font-size:12px; font-weight:normal; color:var(--text-secondary);">CardOptima HK</span></div>
+        <div class="sidebar-item active" onclick="switchView('calculator', '💳 計算與記賬')">💳 計算與記賬</div>
+        <div class="sidebar-item" onclick="switchView('history', '📝 消費記錄')">📝 消費記錄</div>
+        <div class="sidebar-item" onclick="switchView('summary', '💰 每月回贈總結')">💰 每月回贈總結</div>
+    </div>
+
+    <div class="container">
+        <!-- 視圖 1: 計算器 -->
+        <div id="view-calculator" class="view-section active">
+            <div class="form-group">
+                <div class="form-row">
+                    <label>日期</label>
+                    <input type="date" id="txDate">
+                </div>
+                <div class="form-row">
+                    <label>種類</label>
+                    <select id="category">
+                        <option value="dining">🍽️ 餐飲</option>
+                        <option value="online">💻 網購</option>
+                        <option value="supermarket">🛒 超市</option>
+                        <option value="overseas">✈️ 海外/外幣</option>
+                        <option value="general">🛍️ 一般零售</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label>貨幣</label>
+                    <select id="currency" onchange="updateHKDPreview()">
+                        <option value="HKD">HKD 港幣</option>
+                        <option value="CNY">CNY 人民幣</option>
+                        <option value="USD">USD 美元</option>
+                        <option value="JPY">JPY 日圓</option>
+                        <option value="EUR">EUR 歐元</option>
+                        <option value="GBP">GBP 英鎊</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label>金額</label>
+                    <input type="number" id="amount" placeholder="0.00" inputmode="decimal" oninput="updateHKDPreview()">
+                </div>
+                <div id="hkdPreview" class="hkd-preview"></div>
+                <div class="form-row" style="border-bottom: none;">
+                    <label>詳情</label>
+                    <input type="text" id="txDetails" placeholder="消費備註 (選填)">
+                </div>
+            </div>
+            
+            <div id="rateStatus" class="rate-status">獲取即時匯率中...</div>
+
+            <button class="btn" onclick="calculate()">計算最佳信用卡</button>
+
+            <div id="resultsArea" style="display: none; margin-bottom: 30px;">
+                <div class="results-header">👇 點擊你最終決定使用的信用卡以記賬</div>
+                <div id="cardsList"></div>
+            </div>
+        </div>
+
+        <!-- 視圖 2: 消費記錄 -->
+        <div id="view-history" class="view-section">
+            <div class="section-header">
+                <div class="section-title">所有記錄</div>
+                <select id="histMonthPicker" class="month-picker" onchange="renderHistory()"></select>
+            </div>
+            <div class="list-container" id="historyList"></div>
+        </div>
+
+        <!-- 視圖 3: 回贈總結 -->
+        <div id="view-summary" class="view-section">
+            <div class="section-header">
+                <div class="section-title">總結報告</div>
+                <select id="sumMonthPicker" class="month-picker" onchange="renderSummary()"></select>
+            </div>
+            <div class="summary-total">
+                <p>該月總共賺取</p>
+                <h2 id="totalRebateTitle">$0.00</h2>
+            </div>
+            <div class="list-container" id="summaryList"></div>
+        </div>
+    </div>
+
+    <!-- 編輯 Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title">修改消費記錄</div>
+            <div class="form-group">
+                <input type="hidden" id="editId">
+                <div class="form-row">
+                    <label>日期</label>
+                    <input type="date" id="editDate">
+                </div>
+                <div class="form-row">
+                    <label>金額(原幣)</label>
+                    <input type="number" id="editAmount" inputmode="decimal">
+                </div>
+                <div class="form-row">
+                    <label>信用卡</label>
+                    <select id="editCardId"></select>
+                </div>
+                <div class="form-row" style="border-bottom: none;">
+                    <label>詳情</label>
+                    <input type="text" id="editDetails" placeholder="消費備註 (選填)">
+                </div>
+            </div>
+            <button class="btn" onclick="saveEdit()">重新計算並儲存</button>
+            <button class="btn btn-cancel" onclick="closeModal()">取消</button>
+        </div>
+    </div>
+
+<script>
+    let exchangeRates = { HKD: 1, CNY: 1.08, USD: 7.8, JPY: 0.052, EUR: 8.4, GBP: 9.8 };
+    const catNames = { dining: "餐飲", online: "網購", supermarket: "超市", overseas: "海外", general: "一般" };
+
+    const cardsDB = [
+        {
+            id: "boc_chill", name: "中銀 Chill Card",
+            rates: { online: 0.05, overseas: 0.05, dining: 0.004, supermarket: 0.004, general: 0.004 },
+            conditions: "網購、海外、手機支付享5%。每月總額外回贈上限$150 (即簽$3,000)。",
+            limits: { type: "monthly_total_cap", amount: 3000, overflowRate: 0.004 }
+        },
+        {
+            id: "boc_sogo", name: "中銀 SOGO Visa 卡",
+            rates: { general: 0.05, dining: 0.05, supermarket: 0.05, online: 0.05, overseas: 0.05 },
+            conditions: "(假設使用手機支付) 享 5% 現金回贈。每月回贈上限為$100 (即簽$2,000)。",
+            limits: { type: "monthly_total_cap", amount: 2000, overflowRate: 0.004 }
+        },
+        {
+            id: "citic_gba", name: "信銀大灣區雙幣卡",
+            rates: { general: 0.04, dining: 0.04, supermarket: 0.04, online: 0.04, overseas: 0.04 },
+            conditions: "【只限人民幣簽賬 / 雲閃付App】享 4% 現金回贈。每月額外回贈上限$150 (即簽$3,750)。",
+            limits: { type: "monthly_total_cap", amount: 3750, overflowRate: 0.004 }
+        },
+        {
+            id: "hsbc_vs", name: "HSBC Visa Signature",
+            rates: { dining: 0.036, online: 0.004, supermarket: 0.004, overseas: 0.004, general: 0.004 },
+            conditions: "假設『最紅自主獎賞』全投餐飲。餐飲享3.6% (9X獎賞錢)，全年上限簽$100,000。",
+            limits: { type: "yearly_cat_cap", category: "dining", amount: 100000, overflowRate: 0.004 }
+        },
+        {
+            id: "scb_cathay", name: "渣打國泰 Mastercard",
+            rates: { dining: 0.025, online: 0.025, overseas: 0.025, supermarket: 0.0167, general: 0.0167 },
+            conditions: "食肆/網上/海外$4/里(約2.5%)，其他$6/里(約1.67%)。以1里=HK$0.1等值計算。",
+            limits: { type: "none" }
+        },
+        {
+            id: "hangseng_mmpower", name: "恒生 MMPOWER",
+            rates: { online: 0.05, dining: 0.05, overseas: 0.05, supermarket: 0.004, general: 0.004 },
+            conditions: "【需登記】每月需累積簽賬滿$5,000方享5%。每月額外回贈上限$500 (即簽$10,870)。",
+            limits: { type: "monthly_min_and_cap", minAmount: 5000, baseRate: 0.004, maxAmount: 10870 }
+        },
+        {
+            id: "hsbc_red", name: "HSBC Red",
+            rates: { online: 0.04, dining: 0.01, supermarket: 0.01, overseas: 0.01, general: 0.01 },
+            conditions: "網購每月首$10,000享4%，其後1%。",
+            limits: { type: "monthly_cat_cap", category: "online", amount: 10000, overflowRate: 0.01 }
+        },
+        {
+            id: "aeon_wakuwaku", name: "AEON WAKUWAKU",
+            rates: { online: 0.06, dining: 0.01, overseas: 0.01, supermarket: 0.005, general: 0.005 },
+            conditions: "網購享6%，每月回贈上限$300 (即簽$5,000)。日本簽賬3%。",
+            limits: { type: "monthly_cat_cap", category: "online", amount: 5000, overflowRate: 0.005 }
+        },
+        {
+            id: "waka_pac", name: "安信 EarnMORE",
+            rates: { dining: 0.02, overseas: 0.02, online: 0.02, supermarket: 0.02, general: 0.02 },
+            conditions: "所有簽賬2%回贈。每年總簽賬上限為$150,000。",
+            limits: { type: "yearly_total_cap", amount: 150000, overflowRate: 0.01 }
+        }
+    ];
+
+    let currentPendingTx = null; 
+    let currentCalculationResults = [];
+
+    window.onload = async function() {
+        initDefaultDate();
+        initMonthPickers();
+        initEditCardSelector();
+        document.getElementById('histMonthPicker').selectedIndex = 0;
+        document.getElementById('sumMonthPicker').selectedIndex = 0;
+        await fetchLiveRates();
+    };
+
+    // 初始化日期輸入框為今天
+    function initDefaultDate() {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        document.getElementById('txDate').value = `${yyyy}-${mm}-${dd}`;
+    }
+
+    async function fetchLiveRates() {
+        const statusEl = document.getElementById('rateStatus');
+        try {
+            const res = await fetch('https://open.er-api.com/v6/latest/HKD');
+            const data = await res.json();
+            if (data && data.rates) {
+                exchangeRates.CNY = 1 / data.rates.CNY;
+                exchangeRates.USD = 1 / data.rates.USD;
+                exchangeRates.JPY = 1 / data.rates.JPY;
+                exchangeRates.EUR = 1 / data.rates.EUR;
+                exchangeRates.GBP = 1 / data.rates.GBP;
+                statusEl.innerText = "🔄 即時匯率: 已更新 ✅";
+                statusEl.style.color = "var(--green)";
+            }
+        } catch (error) {
+            statusEl.innerText = "⚠️ 即時匯率: 離線 (使用預設)";
+            statusEl.style.color = "var(--orange)";
+        }
+    }
+
+    function updateHKDPreview() {
+        const currency = document.getElementById('currency').value;
+        const rawAmount = parseFloat(document.getElementById('amount').value);
+        const preview = document.getElementById('hkdPreview');
+
+        if (currency === 'HKD' || isNaN(rawAmount) || rawAmount <= 0) {
+            preview.style.display = 'none';
+        } else {
+            const hkd = rawAmount * exchangeRates[currency];
+            preview.innerText = `折合約 HKD $${hkd.toFixed(2)}`;
+            preview.style.display = 'block';
+        }
+    }
+
+    function toggleMenu() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('overlay').classList.toggle('show');
+    }
+
+    function switchView(viewId, title) {
+        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+        document.getElementById(`view-${viewId}`).classList.add('active');
+        document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        document.getElementById('headerTitle').innerText = title;
+        toggleMenu();
+
+        if(viewId === 'history') renderHistory();
+        if(viewId === 'summary') renderSummary();
+    }
+
+    function initMonthPickers() {
+        const p1 = document.getElementById('histMonthPicker');
+        const p2 = document.getElementById('sumMonthPicker');
+        const today = new Date();
+        for (let i = 0; i < 12; i++) {
+            let d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+            let val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+            let label = `${d.getFullYear()}年${d.getMonth() + 1}月`;
+            p1.options.add(new Option(label, val));
+            p2.options.add(new Option(label, val));
+        }
+    }
+
+    function initEditCardSelector() {
+        const sel = document.getElementById('editCardId');
+        cardsDB.forEach(c => sel.options.add(new Option(c.name, c.id)));
+    }
+
+    // 計算指定日期的累積金額
+    function getCardAccumulation(cardId, type, category = null, targetDate = new Date(), excludeTxId = null) {
+        const history = JSON.parse(localStorage.getItem('hkCardHistory')) || [];
+        const tMonth = targetDate.getMonth() + 1;
+        const tYear = targetDate.getFullYear();
+
+        return history.filter(h => {
+            if (h.id === excludeTxId) return false;
+            if (h.cardId !== cardId) return false;
+            if (type === 'monthly' && (h.month !== tMonth || h.year !== tYear)) return false;
+            if (type === 'yearly' && h.year !== tYear) return false;
+            if (category && h.category !== category) return false;
+            return true;
+        }).reduce((sum, h) => sum + h.amountHKD, 0); 
+    }
+
+    function calculateRebateForCard(card, cat, amountHKD, targetDate = new Date(), excludeTxId = null) {
+        let rate = card.rates[cat] || 0.004;
+        let note = "";
+        let expectedRebate = 0;
+
+        if (card.limits.type === "monthly_cat_cap" && card.limits.category === cat) {
+            let catSpent = getCardAccumulation(card.id, 'monthly', cat, targetDate, excludeTxId);
+            if (catSpent >= card.limits.amount) {
+                rate = card.limits.overflowRate;
+                note = `⚠️ 該月此類別已達上限，僅享基本回贈。`;
+            } else if (catSpent + amountHKD > card.limits.amount) {
+                let validAmt = card.limits.amount - catSpent;
+                expectedRebate = (validAmt * rate) + ((amountHKD - validAmt) * card.limits.overflowRate);
+                note = `⚠️ 簽此單後超出類別上限，部分按基本回贈計算。`;
+            }
+        }
+        else if (card.limits.type === "yearly_total_cap") {
+            let yearSpent = getCardAccumulation(card.id, 'yearly', null, targetDate, excludeTxId);
+            if (yearSpent >= card.limits.amount) {
+                rate = card.limits.overflowRate;
+                note = `⚠️ 已達年度上限，僅享基本回贈。`;
+            } else if (yearSpent + amountHKD > card.limits.amount) {
+                let validAmt = card.limits.amount - yearSpent;
+                expectedRebate = (validAmt * rate) + ((amountHKD - validAmt) * card.limits.overflowRate);
+                note = `⚠️ 簽此單後將超出年度上限，部分按基本回贈計算。`;
+            }
+        }
+        else if (card.limits.type === "yearly_cat_cap" && card.limits.category === cat) {
+            let catSpent = getCardAccumulation(card.id, 'yearly', cat, targetDate, excludeTxId);
+            if (catSpent >= card.limits.amount) {
+                rate = card.limits.overflowRate;
+                note = "⚠️ 該類別已達全年上限，僅享基本回贈。";
+            } else if (catSpent + amountHKD > card.limits.amount) {
+                let validAmt = card.limits.amount - catSpent;
+                expectedRebate = (validAmt * rate) + ((amountHKD - validAmt) * card.limits.overflowRate);
+                note = "⚠️ 簽此單後超出全年上限，部分按基本回贈計算。";
+            }
+        }
+        else if (card.limits.type === "monthly_min_and_cap") {
+            let totalSpent = getCardAccumulation(card.id, 'monthly', null, targetDate, excludeTxId);
+            let newTotal = totalSpent + amountHKD;
+            if (newTotal < card.limits.minAmount) {
+                rate = card.limits.baseRate;
+                note = `❌ 該月累積僅 $${newTotal.toFixed(0)}，未達 $${card.limits.minAmount} 門檻。`;
+            } else {
+                if (totalSpent >= card.limits.maxAmount) {
+                    rate = card.limits.baseRate;
+                    note = `⚠️ 該月總額外回贈已達上限。`;
+                } else if (newTotal > card.limits.maxAmount) {
+                    let validAmt = card.limits.maxAmount - totalSpent;
+                    expectedRebate = (validAmt * rate) + ((amountHKD - validAmt) * card.limits.baseRate);
+                    note = `✅ 達門檻但將超出上限，溢出部分為基本回贈。`;
+                } else {
+                    note = `✅ 成功觸發高回贈條件！`;
+                }
+            }
+        }
+        else if (card.limits.type === "monthly_total_cap") {
+            let monthSpent = getCardAccumulation(card.id, 'monthly', null, targetDate, excludeTxId);
+            if (monthSpent >= card.limits.amount) {
+                rate = card.limits.overflowRate;
+                note = `⚠️ 該月總簽賬已達回贈上限，僅享基本回贈。`;
+            } else if (monthSpent + amountHKD > card.limits.amount) {
+                let validAmt = card.limits.amount - monthSpent;
+                expectedRebate = (validAmt * rate) + ((amountHKD - validAmt) * card.limits.overflowRate);
+                note = `⚠️ 簽此單後將超出每月回贈上限，部分金額按基本回贈計算。`;
+            }
+        }
+
+        if (expectedRebate === 0) expectedRebate = amountHKD * rate;
+
+        return { rebate: expectedRebate, note: note };
+    }
+
+    function calculate() {
+        const dateStr = document.getElementById('txDate').value;
+        if (!dateStr) { alert("請選擇日期！"); return; }
+        
+        // 將字串轉為日期物件，並加上 T12:00:00 確保不會因為時區偏移導致日期變更
+        const txDateObj = new Date(dateStr + 'T12:00:00'); 
+        
+        const cat = document.getElementById('category').value;
+        const currency = document.getElementById('currency').value;
+        const rawAmount = parseFloat(document.getElementById('amount').value);
+        const details = document.getElementById('txDetails').value.trim();
+
+        if (isNaN(rawAmount) || rawAmount <= 0) { alert("請輸入有效金額！"); return; }
+        const amountHKD = rawAmount * exchangeRates[currency];
+
+        currentPendingTx = { 
+            txDateObj: txDateObj, // 傳遞選擇的日期物件
+            category: cat, 
+            currency: currency, 
+            rawAmount: rawAmount, 
+            amountHKD: amountHKD, 
+            details: details 
+        };
+        currentCalculationResults = [];
+
+        cardsDB.forEach(card => {
+            let calc = calculateRebateForCard(card, cat, amountHKD, txDateObj);
+            
+            if (card.id === "citic_gba" && currency !== "CNY") {
+                calc.note = "⚠️ 如非使用雲閃付App或人民幣結算，將不能享有4%回贈。";
+            }
+
+            currentCalculationResults.push({
+                ...card,
+                calculatedRebate: calc.rebate,
+                finalRate: (calc.rebate / amountHKD * 100).toFixed(2),
+                warningNote: calc.note
+            });
+        });
+
+        currentCalculationResults.sort((a, b) => b.calculatedRebate - a.calculatedRebate);
+        renderResults();
+    }
+
+    function renderResults() {
+        const container = document.getElementById('cardsList');
+        container.innerHTML = "";
+        document.getElementById('resultsArea').style.display = "block";
+
+        currentCalculationResults.slice(0, 5).forEach((res, index) => {
+            const isBest = index === 0;
+            const cardDiv = document.createElement('div');
+            cardDiv.className = `card-result ${isBest ? 'card-best' : ''}`;
+            cardDiv.onclick = () => selectAndRecord(res.id);
+            
+            let badgeHtml = isBest ? `<div class="badge">🏆 最佳選擇</div>` : '';
+            let conditionsHtml = `<div class="card-conditions"><span>📌</span><span>${res.conditions}</span></div>`;
+            if (res.warningNote) {
+                let isWarn = res.warningNote.includes('⚠️') || res.warningNote.includes('❌');
+                let bg = isWarn ? 'rgba(255, 59, 48, 0.1)' : 'rgba(52, 199, 89, 0.1)';
+                let col = isWarn ? 'var(--red)' : 'var(--green)';
+                conditionsHtml += `<div class="card-conditions" style="background: ${bg}; color: ${col};"><span></span><span>${res.warningNote}</span></div>`;
+            }
+
+            cardDiv.innerHTML = `
+                ${badgeHtml}
+                <div class="card-title">
+                    <span>${res.name}</span>
+                    <span class="rebate-amount">+$${res.calculatedRebate.toFixed(2)} (${res.finalRate}%)</span>
+                </div>
+                ${conditionsHtml}
+            `;
+            container.appendChild(cardDiv);
+        });
+    }
+
+    function selectAndRecord(cardId) {
+        if (!currentPendingTx) return;
+        const cardResult = currentCalculationResults.find(c => c.id === cardId);
+        const earnedRebate = cardResult ? cardResult.calculatedRebate : 0;
+        
+        const txDateObj = currentPendingTx.txDateObj;
+        
+        const tx = {
+            id: Date.now(),
+            date: txDateObj.toLocaleDateString('zh-HK'),
+            timestamp: txDateObj.getTime(),
+            month: txDateObj.getMonth() + 1,
+            year: txDateObj.getFullYear(),
+            cardId: cardId,
+            rebateEarned: earnedRebate,
+            category: currentPendingTx.category,
+            currency: currentPendingTx.currency,
+            rawAmount: currentPendingTx.rawAmount,
+            amountHKD: currentPendingTx.amountHKD,
+            details: currentPendingTx.details
+        };
+
+        let history = JSON.parse(localStorage.getItem('hkCardHistory')) || [];
+        history.push(tx);
+        localStorage.setItem('hkCardHistory', JSON.stringify(history));
+
+        // 清空輸入
+        document.getElementById('amount').value = "";
+        document.getElementById('txDetails').value = "";
+        document.getElementById('hkdPreview').style.display = "none";
+        document.getElementById('resultsArea').style.display = "none";
+        
+        // 成功記賬後，自動將歷史記錄的月份篩選切換到該筆消費的月份
+        const txMonthVal = `${tx.year}-${String(tx.month).padStart(2, '0')}`;
+        document.getElementById('histMonthPicker').value = txMonthVal;
+        document.getElementById('sumMonthPicker').value = txMonthVal;
+
+        currentPendingTx = null;
+        currentCalculationResults = [];
+        
+        alert(`✅ 成功記錄消費！\n日期: ${tx.date}\n卡片: ${cardResult.name}\n預計賺取: $${earnedRebate.toFixed(2)}`);
+    }
+
+    // 視圖：消費記錄
+    function renderHistory() {
+        const history = JSON.parse(localStorage.getItem('hkCardHistory')) || [];
+        const container = document.getElementById('historyList');
+        const filterVal = document.getElementById('histMonthPicker').value;
+        if(!filterVal) return;
+        const [fYear, fMonth] = filterVal.split('-').map(Number);
+
+        const filtered = history.filter(h => h.year === fYear && h.month === fMonth);
+        container.innerHTML = "";
+
+        if (filtered.length === 0) {
+            container.innerHTML = `<div class="list-item" style="color:var(--text-secondary);justify-content:center;">此月份尚無記錄</div>`;
+            return;
+        }
+
+        // 按照消費日期(Timestamp)排序，最新的在最上
+        filtered.sort((a,b) => b.timestamp - a.timestamp).forEach(item => {
+            let cardObj = cardsDB.find(c => c.id === item.cardId);
+            let cardName = cardObj ? cardObj.name : "未知信用卡";
+            let rebateStr = item.rebateEarned ? `+$${item.rebateEarned.toFixed(2)}` : '+$0.00';
+            
+            let amtDisplay = `${item.currency} ${item.rawAmount.toFixed(2)}`;
+            if(item.currency !== 'HKD') {
+                amtDisplay += ` <span style="font-size:12px; color:var(--text-secondary); font-weight:normal;">(約 HKD $${item.amountHKD.toFixed(0)})</span>`;
+            }
+            
+            let detailsHtml = item.details ? `<div class="item-details-text">📝 ${item.details}</div>` : '';
+
+            // 如果使用 toLocaleDateString，可能格式不一，直接用保存的 item.date
+            const div = document.createElement('div');
+            div.className = 'list-item';
+            div.innerHTML = `
+                <div class="item-info">
+                    <div style="font-weight: 500;">${catNames[item.category]} - ${amtDisplay}</div>
+                    ${detailsHtml}
+                    <div class="item-sub">
+                        <span class="item-card-tag">${cardName}</span>
+                        <span>${item.date}</span>
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <div class="rebate-amount">${rebateStr}</div>
+                    <div class="item-actions">
+                        <button class="action-btn" onclick="openEdit(${item.id})">✏️</button>
+                        <button class="action-btn" onclick="deleteTx(${item.id})">🗑️</button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function deleteTx(id) {
+        if(confirm("確定要刪除這筆記錄嗎？")) {
+            let history = JSON.parse(localStorage.getItem('hkCardHistory')) || [];
+            history = history.filter(h => h.id !== id);
+            localStorage.setItem('hkCardHistory', JSON.stringify(history));
+            renderHistory();
+        }
+    }
+
+    function openEdit(id) {
+        let history = JSON.parse(localStorage.getItem('hkCardHistory')) || [];
+        let tx = history.find(h => h.id === id);
+        if(!tx) return;
+
+        // 還原日期格式為 YYYY-MM-DD 供 date picker 使用
+        let d = new Date(tx.timestamp);
+        let dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+        document.getElementById('editId').value = tx.id;
+        document.getElementById('editDate').value = dateStr;
+        document.getElementById('editAmount').value = tx.rawAmount;
+        document.getElementById('editCardId').value = tx.cardId;
+        document.getElementById('editDetails').value = tx.details || "";
+        document.getElementById('editModal').style.display = "flex";
+    }
+
+    function closeModal() { document.getElementById('editModal').style.display = "none"; }
+
+    function saveEdit() {
+        let id = parseInt(document.getElementById('editId').value);
+        let dateStr = document.getElementById('editDate').value;
+        let newAmount = parseFloat(document.getElementById('editAmount').value);
+        let newCardId = document.getElementById('editCardId').value;
+        let newDetails = document.getElementById('editDetails').value.trim();
+
+        if (!dateStr) { alert("請選擇日期"); return; }
+        if (isNaN(newAmount) || newAmount <= 0) { alert("請輸入有效金額"); return; }
+
+        let txDateObj = new Date(dateStr + 'T12:00:00');
+
+        let history = JSON.parse(localStorage.getItem('hkCardHistory')) || [];
+        let index = history.findIndex(h => h.id === id);
+        
+        if (index !== -1) {
+            let tx = history[index];
+            tx.date = txDateObj.toLocaleDateString('zh-HK');
+            tx.timestamp = txDateObj.getTime();
+            tx.month = txDateObj.getMonth() + 1;
+            tx.year = txDateObj.getFullYear();
+            
+            tx.rawAmount = newAmount;
+            tx.amountHKD = newAmount * exchangeRates[tx.currency]; 
+            tx.cardId = newCardId;
+            tx.details = newDetails;
+            
+            let cardObj = cardsDB.find(c => c.id === newCardId);
+            let calc = calculateRebateForCard(cardObj, tx.category, tx.amountHKD, txDateObj, tx.id);
+            tx.rebateEarned = calc.rebate;
+
+            localStorage.setItem('hkCardHistory', JSON.stringify(history));
+            
+            // 編輯後自動跳轉到該記錄的新月份視圖
+            document.getElementById('histMonthPicker').value = `${tx.year}-${String(tx.month).padStart(2, '0')}`;
+        }
+        
+        closeModal();
+        renderHistory();
+    }
+
+    // 視圖：回贈總結
+    function renderSummary() {
+        const history = JSON.parse(localStorage.getItem('hkCardHistory')) || [];
+        const container = document.getElementById('summaryList');
+        const filterVal = document.getElementById('sumMonthPicker').value;
+        if(!filterVal) return;
+        const [fYear, fMonth] = filterVal.split('-').map(Number);
+
+        const filtered = history.filter(h => h.year === fYear && h.month === fMonth);
+        let summaryMap = {};
+        let grandTotal = 0;
+
+        filtered.forEach(tx => {
+            if(!summaryMap[tx.cardId]) summaryMap[tx.cardId] = { spent: 0, rebate: 0 };
+            summaryMap[tx.cardId].spent += tx.amountHKD;
+            summaryMap[tx.cardId].rebate += (tx.rebateEarned || 0);
+            grandTotal += (tx.rebateEarned || 0);
+        });
+
+        document.getElementById('totalRebateTitle').innerText = `$${grandTotal.toFixed(2)}`;
+        container.innerHTML = "";
+
+        let summaryArr = Object.keys(summaryMap).map(cardId => ({
+            cardId: cardId, ...summaryMap[cardId]
+        })).sort((a, b) => b.rebate - a.rebate);
+
+        if (summaryArr.length === 0) {
+            container.innerHTML = `<div class="list-item" style="color:var(--text-secondary);justify-content:center;">此月份無回贈數據</div>`;
+            return;
+        }
+
+        summaryArr.forEach(item => {
+            let cardObj = cardsDB.find(c => c.id === item.cardId);
+            let cardName = cardObj ? cardObj.name : "未知信用卡";
+            const div = document.createElement('div');
+            div.className = 'list-item';
+            div.innerHTML = `
+                <div class="item-info">
+                    <div style="font-weight: 600;">${cardName}</div>
+                    <div class="item-sub">累積簽賬: $${item.spent.toFixed(2)}</div>
+                </div>
+                <div class="rebate-amount" style="font-size: 18px;">+$${item.rebate.toFixed(2)}</div>
+            `;
+            container.appendChild(div);
+        });
+    }
+</script>
+</body>
+</html>
