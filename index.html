@@ -46,26 +46,51 @@
         .view-section { display: none; }
         .view-section.active { display: block; }
 
-        /* iOS Form Alignment Fixes */
+        /* Form & Cards (Updated for iOS Right Alignment) */
         .form-group { background: var(--card-bg); border-radius: 10px; overflow: hidden; margin-bottom: 10px; }
-        .form-row { 
-            display: flex; align-items: center; justify-content: space-between; 
-            min-height: 50px; padding: 0 16px; border-bottom: 1px solid var(--border-color); 
-        }
+        .form-row { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border-color); }
         .form-row:last-child { border-bottom: none; }
         .form-row label { width: 80px; font-size: 17px; flex-shrink: 0; color: var(--text-main); }
         
-        /* 統一 Input & Select 樣式以解決 iOS 偏移問題 */
-        .form-row input, .form-row select { 
-            flex: 1; border: none; font-size: 17px; background: transparent; outline: none; 
-            text-align: right; color: var(--blue); appearance: none; -webkit-appearance: none; 
-            margin: 0; padding: 0; line-height: normal; height: 100%; width: 100%;
+        /* 核心修復：使用 Wrapper 強制內容靠右 */
+        .input-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            width: 100%;
         }
+        
+        .form-row input, .form-row select { 
+            border: none; 
+            font-size: 17px; 
+            background: transparent; 
+            outline: none; 
+            text-align: right; 
+            color: var(--blue); 
+            appearance: none; 
+            -webkit-appearance: none; 
+            padding: 0; 
+            margin: 0; 
+        }
+        
+        /* Date 與 Select 縮放至內容大小，讓 Wrapper 將其推向最右 */
+        .form-row select, .form-row input[type="date"] {
+            width: auto;
+            max-width: 100%;
+            text-align-last: right;
+        }
+        
+        /* 文字與數字輸入框保持全寬以方便點擊 */
+        .form-row input[type="number"], .form-row input[type="text"] {
+            width: 100%;
+        }
+
         .form-row input::placeholder { color: var(--text-secondary); opacity: 0.6; text-align: right; }
         
-        /* 針對 iOS Date Picker 特殊處理 */
-        input[type="date"]::-webkit-date-and-time-value { text-align: right; margin: 0; }
-        input[type="date"]::-webkit-calendar-picker-indicator { display: none; }
+        /* iOS Date Input 深層元件對齊修復 */
+        input[type="date"]::-webkit-date-and-time-value { text-align: right; }
+        input[type="date"]::-webkit-datetime-edit { display: flex; justify-content: flex-end; padding: 0; }
         
         .hkd-preview { text-align: right; font-size: 13px; color: var(--text-secondary); padding: 0 16px 12px; display: none; }
         .rate-status { font-size: 12px; color: var(--text-secondary); text-align: center; margin-bottom: 20px; }
@@ -110,11 +135,13 @@
 </head>
 <body>
 
+    <!-- 頂部導航 -->
     <div class="header">
         <button class="menu-btn" onclick="toggleMenu()">☰</button>
         <div class="header-title" id="headerTitle">💳 計算與記賬</div>
     </div>
 
+    <!-- 側邊選單 -->
     <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-title">卡優算<br><span style="font-size:12px; font-weight:normal; color:var(--text-secondary);">CardOptima HK</span></div>
@@ -124,45 +151,56 @@
     </div>
 
     <div class="container">
+        <!-- 視圖 1: 計算器 -->
         <div id="view-calculator" class="view-section active">
             <div class="form-group">
                 <div class="form-row">
-                    <label>日期</label>
-                    <input type="date" id="txDate">
+                    <label for="txDate">日期</label>
+                    <div class="input-wrapper">
+                        <input type="date" id="txDate">
+                    </div>
                 </div>
                 <div class="form-row">
-                    <label>種類</label>
-                    <select id="category">
-                        <option value="dining">🍽️ 餐飲</option>
-                        <option value="online">💻 網購</option>
-                        <option value="supermarket">🛒 超市</option>
-                        <option value="overseas">✈️ 海外/外幣</option>
-                        <option value="general">🛍️ 一般零售</option>
-                    </select>
+                    <label for="category">種類</label>
+                    <div class="input-wrapper">
+                        <select id="category">
+                            <option value="dining">🍽️ 餐飲</option>
+                            <option value="online">💻 網購</option>
+                            <option value="supermarket">🛒 超市</option>
+                            <option value="overseas">✈️ 海外/外幣</option>
+                            <option value="general">🛍️ 一般零售</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-row">
-                    <label>貨幣</label>
-                    <select id="currency" onchange="updateHKDPreview()">
-                        <option value="HKD">HKD 港幣</option>
-                        <option value="CNY">CNY 人民幣</option>
-                        <option value="USD">USD 美元</option>
-                        <option value="JPY">JPY 日圓</option>
-                        <option value="EUR">EUR 歐元</option>
-                        <option value="GBP">GBP 英鎊</option>
-                    </select>
+                    <label for="currency">貨幣</label>
+                    <div class="input-wrapper">
+                        <select id="currency" onchange="updateHKDPreview()">
+                            <option value="HKD">HKD 港幣</option>
+                            <option value="CNY">CNY 人民幣</option>
+                            <option value="USD">USD 美元</option>
+                            <option value="JPY">JPY 日圓</option>
+                            <option value="EUR">EUR 歐元</option>
+                            <option value="GBP">GBP 英鎊</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-row">
-                    <label>金額</label>
-                    <input type="number" id="amount" placeholder="0.00" inputmode="decimal" oninput="updateHKDPreview()">
+                    <label for="amount">金額</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="amount" placeholder="0.00" inputmode="decimal" oninput="updateHKDPreview()">
+                    </div>
                 </div>
                 <div id="hkdPreview" class="hkd-preview"></div>
                 <div class="form-row" style="border-bottom: none;">
-                    <label>詳情</label>
-                    <input type="text" id="txDetails" placeholder="消費備註 (選填)">
+                    <label for="txDetails">詳情</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="txDetails" placeholder="消費備註 (選填)">
+                    </div>
                 </div>
             </div>
             
-            <div id="rateStatus" class="rate-status">🔄 獲取即時匯率及回贈數據中...</div>
+            <div id="rateStatus" class="rate-status">獲取即時匯率中...</div>
 
             <button class="btn" onclick="calculate()">計算最佳信用卡</button>
 
@@ -172,6 +210,7 @@
             </div>
         </div>
 
+        <!-- 視圖 2: 消費記錄 -->
         <div id="view-history" class="view-section">
             <div class="section-header">
                 <div class="section-title">所有記錄</div>
@@ -180,6 +219,7 @@
             <div class="list-container" id="historyList"></div>
         </div>
 
+        <!-- 視圖 3: 回贈總結 -->
         <div id="view-summary" class="view-section">
             <div class="section-header">
                 <div class="section-title">總結報告</div>
@@ -193,26 +233,35 @@
         </div>
     </div>
 
+    <!-- 編輯 Modal -->
     <div id="editModal" class="modal">
         <div class="modal-content">
             <div class="modal-title">修改消費記錄</div>
             <div class="form-group">
                 <input type="hidden" id="editId">
                 <div class="form-row">
-                    <label>日期</label>
-                    <input type="date" id="editDate">
+                    <label for="editDate">日期</label>
+                    <div class="input-wrapper">
+                        <input type="date" id="editDate">
+                    </div>
                 </div>
                 <div class="form-row">
-                    <label>金額(原幣)</label>
-                    <input type="number" id="editAmount" inputmode="decimal">
+                    <label for="editAmount">金額(原幣)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="editAmount" inputmode="decimal">
+                    </div>
                 </div>
                 <div class="form-row">
-                    <label>信用卡</label>
-                    <select id="editCardId"></select>
+                    <label for="editCardId">信用卡</label>
+                    <div class="input-wrapper">
+                        <select id="editCardId"></select>
+                    </div>
                 </div>
                 <div class="form-row" style="border-bottom: none;">
-                    <label>詳情</label>
-                    <input type="text" id="editDetails" placeholder="消費備註 (選填)">
+                    <label for="editDetails">詳情</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="editDetails" placeholder="消費備註 (選填)">
+                    </div>
                 </div>
             </div>
             <button class="btn" onclick="saveEdit()">重新計算並儲存</button>
@@ -224,9 +273,7 @@
     let exchangeRates = { HKD: 1, CNY: 1.08, USD: 7.8, JPY: 0.052, EUR: 8.4, GBP: 9.8 };
     const catNames = { dining: "餐飲", online: "網購", supermarket: "超市", overseas: "海外", general: "一般" };
 
-    // 預設備份資料庫 (Fallback Database)
-    // 如果未來你用 GitHub Actions 生成了 cards.json，程式會優先讀取那邊的資料。
-    let cardsDB = [
+    const cardsDB = [
         {
             id: "boc_chill", name: "中銀 Chill Card",
             rates: { online: 0.05, overseas: 0.05, dining: 0.004, supermarket: 0.004, general: 0.004 },
@@ -278,7 +325,7 @@
         {
             id: "waka_pac", name: "安信 EarnMORE",
             rates: { dining: 0.02, overseas: 0.02, online: 0.02, supermarket: 0.02, general: 0.02 },
-            conditions: "所有簽賬劃一2%回贈。每年總簽賬上限為$150,000。",
+            conditions: "所有簽賬2%回贈。每年總簽賬上限為$150,000。",
             limits: { type: "yearly_total_cap", amount: 150000, overflowRate: 0.01 }
         }
     ];
@@ -289,13 +336,10 @@
     window.onload = async function() {
         initDefaultDate();
         initMonthPickers();
-        
-        // 平行載入匯率和外部信用卡數據 (如日後設定了 GitHub Action)
-        await Promise.all([fetchLiveRates(), fetchLatestCardsData()]);
-        
         initEditCardSelector();
         document.getElementById('histMonthPicker').selectedIndex = 0;
         document.getElementById('sumMonthPicker').selectedIndex = 0;
+        await fetchLiveRates();
     };
 
     function initDefaultDate() {
@@ -317,29 +361,12 @@
                 exchangeRates.JPY = 1 / data.rates.JPY;
                 exchangeRates.EUR = 1 / data.rates.EUR;
                 exchangeRates.GBP = 1 / data.rates.GBP;
-                statusEl.innerText = "✅ 即時匯率已更新。";
+                statusEl.innerText = "🔄 即時匯率: 已更新 ✅";
                 statusEl.style.color = "var(--green)";
             }
         } catch (error) {
             statusEl.innerText = "⚠️ 即時匯率: 離線 (使用預設)";
             statusEl.style.color = "var(--orange)";
-        }
-    }
-
-    // 這個函數保留作未來 Web Scraping 串接用
-    async function fetchLatestCardsData() {
-        try {
-            // 嘗試讀取同目錄下的 cards.json (由 GitHub Actions 每日生成的檔案)
-            const res = await fetch('./cards.json');
-            if (res.ok) {
-                const externalData = await res.json();
-                if (externalData && externalData.length > 0) {
-                    cardsDB = externalData; // 覆蓋本地備用數據庫
-                    console.log("Successfully loaded scraped data from cards.json");
-                }
-            }
-        } catch (error) {
-            console.log("No external cards.json found, using built-in fallback database.");
         }
     }
 
@@ -389,7 +416,6 @@
 
     function initEditCardSelector() {
         const sel = document.getElementById('editCardId');
-        sel.innerHTML = ""; // 清空後重新加入，確保取到最新的 cardsDB
         cardsDB.forEach(c => sel.options.add(new Option(c.name, c.id)));
     }
 
@@ -497,7 +523,7 @@
         const amountHKD = rawAmount * exchangeRates[currency];
 
         currentPendingTx = { 
-            txDateObj: txDateObj,
+            txDateObj: txDateObj, 
             category: cat, 
             currency: currency, 
             rawAmount: rawAmount, 
@@ -583,7 +609,6 @@
         history.push(tx);
         localStorage.setItem('hkCardHistory', JSON.stringify(history));
 
-        // 清空輸入
         document.getElementById('amount').value = "";
         document.getElementById('txDetails').value = "";
         document.getElementById('hkdPreview').style.display = "none";
@@ -708,6 +733,7 @@
             tx.rebateEarned = calc.rebate;
 
             localStorage.setItem('hkCardHistory', JSON.stringify(history));
+            
             document.getElementById('histMonthPicker').value = `${tx.year}-${String(tx.month).padStart(2, '0')}`;
         }
         
