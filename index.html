@@ -43,6 +43,7 @@
         .view-section { display: none; }
         .view-section.active { display: block; }
 
+        /* Form Alignments (iOS Compatible) */
         .form-group { background: var(--card-bg); border-radius: 10px; overflow: hidden; margin-bottom: 10px; }
         .form-row { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border-color); }
         .form-row:last-child { border-bottom: none; }
@@ -97,11 +98,13 @@
 </head>
 <body>
 
+    <!-- 頂部導航 -->
     <div class="header">
         <button class="menu-btn" onclick="toggleMenu()">☰</button>
         <div class="header-title" id="headerTitle">💳 計算與記賬</div>
     </div>
 
+    <!-- 側邊選單 -->
     <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-title">卡優算<br><span style="font-size:12px; font-weight:normal; color:var(--text-secondary);">CardOptima HK</span></div>
@@ -136,6 +139,7 @@
                     <div class="input-wrapper">
                         <select id="currency" onchange="updateHKDPreview()">
                             <option value="HKD">HKD 港幣</option>
+                            <option value="MOP">MOP 澳門幣</option>
                             <option value="CNY">CNY 人民幣</option>
                             <option value="USD">USD 美元</option>
                             <option value="JPY">JPY 日圓</option>
@@ -228,10 +232,10 @@
     </div>
 
 <script>
-    let exchangeRates = { HKD: 1, CNY: 1.08, USD: 7.8, JPY: 0.052, EUR: 8.4, GBP: 9.8 };
+    // 加入了 MOP (澳門幣)，預設匯率為 0.97 (1 MOP ≈ 0.97 HKD) 
+    let exchangeRates = { HKD: 1, MOP: 0.97, CNY: 1.08, USD: 7.8, JPY: 0.052, EUR: 8.4, GBP: 9.8 };
     const catNames = { dining: "餐飲", online: "網購", supermarket: "超市", general: "一般" };
 
-    // 資料庫 (已刪除 AEON 及 安信，更新 MMPOWER 條件)
     const cardsDB = [
         {
             id: "hangseng_mmpower", name: "恒生 MMPOWER",
@@ -263,7 +267,7 @@
         },
         {
             id: "hsbc_everymile", name: "滙豐 EveryMile 信用卡",
-            conditions: "基本簽賬$5/里(約2%)。指定日常消費$2/里(約5%)。"
+            conditions: "基本簽賬$5/里(約2%)。指定日常消費(如交通/咖啡)$2/里(約5%)。以1里=HK$0.1等值計算。"
         },
         {
             id: "ccb_eye", name: "建行(亞洲) eye 信用卡",
@@ -297,11 +301,14 @@
             const res = await fetch('https://open.er-api.com/v6/latest/HKD');
             const data = await res.json();
             if (data && data.rates) {
-                exchangeRates.CNY = 1 / data.rates.CNY;
-                exchangeRates.USD = 1 / data.rates.USD;
-                exchangeRates.JPY = 1 / data.rates.JPY;
-                exchangeRates.EUR = 1 / data.rates.EUR;
-                exchangeRates.GBP = 1 / data.rates.GBP;
+                // 實時 API 未必支援 MOP，若支援則覆蓋，否則保留預設 0.97
+                if(data.rates.MOP) exchangeRates.MOP = 1 / data.rates.MOP;
+                if(data.rates.CNY) exchangeRates.CNY = 1 / data.rates.CNY;
+                if(data.rates.USD) exchangeRates.USD = 1 / data.rates.USD;
+                if(data.rates.JPY) exchangeRates.JPY = 1 / data.rates.JPY;
+                if(data.rates.EUR) exchangeRates.EUR = 1 / data.rates.EUR;
+                if(data.rates.GBP) exchangeRates.GBP = 1 / data.rates.GBP;
+                
                 statusEl.innerText = "🔄 即時匯率: 已更新 ✅";
                 statusEl.style.color = "var(--green)";
             }
@@ -360,6 +367,7 @@
         cardsDB.forEach(c => sel.options.add(new Option(c.name, c.id)));
     }
 
+    // 獲取該卡片本月所有簽賬（排除正在編輯的項目）
     function getMonthlyTransactions(cardId, targetDate, excludeTxId) {
         const history = JSON.parse(localStorage.getItem('hkCardHistory')) || [];
         const tMonth = targetDate.getMonth() + 1;
@@ -367,24 +375,24 @@
         return history.filter(h => h.cardId === cardId && h.id !== excludeTxId && h.month === tMonth && h.year === tYear);
     }
 
+    // 獲取該卡片本年度所有簽賬（排除正在編輯的項目）
     function getYearlyTransactions(cardId, targetDate, excludeTxId) {
         const history = JSON.parse(localStorage.getItem('hkCardHistory')) || [];
         const tYear = targetDate.getFullYear();
         return history.filter(h => h.cardId === cardId && h.id !== excludeTxId && h.year === tYear);
     }
 
-    // 全新獨立模組化精算引擎
+    // 全新獨立模組化精算引擎 - 每個卡片獨立計算邏輯，確保精確無誤
     function calculateRebateForCard(card, cat, amountHKD, currency, targetDate = new Date(), excludeTxId = null) {
         let expectedRebate = 0;
         let note = "";
-        let finalRate = 0;
         
         let monthTxs = getMonthlyTransactions(card.id, targetDate, excludeTxId);
         let yearTxs = getYearlyTransactions(card.id, targetDate, excludeTxId);
 
         if (card.id === "hangseng_mmpower") {
-            // MMPOWER: Online 5% (0.4% base + 4.6% extra), Foreign Currency 4% (0.4% base + 3.6% extra). Others 0.4%.
             let monthTotal = monthTxs.reduce((sum, t) => sum + t.amountHKD, 0);
+            // MMPOWER: Online 5% (+4.6%), Foreign Currency 4% (+3.6%). Base 0.4%.
             let extraEarned = monthTxs.reduce((sum, t) => {
                 let isFc = t.currency !== 'HKD';
                 if (t.category === 'online') return sum + (t.amountHKD * 0.046);
@@ -471,14 +479,14 @@
         if (card.id === "citic_gba") {
             if (currency !== 'CNY') {
                 expectedRebate = amountHKD * 0.005;
-                note = "⚠️ 系統假設：如非使用雲閃付或人民幣結算，將不能享有4%回贈。";
+                note = "⚠️ 系統假設：如非使用雲閃付或人民幣結算，將不能享有 4% 額外回贈。";
                 return { rebate: expectedRebate, note: note };
             }
             let extraEarned = monthTxs.reduce((sum, t) => t.currency === 'CNY' ? sum + (t.amountHKD * 0.035) : sum, 0);
             let availableExtra = 150 - extraEarned;
             if (availableExtra <= 0) {
                 expectedRebate = amountHKD * 0.005;
-                note = `⚠️ 本月 $150 額外回贈已達上限，僅享 0.5% 回贈。`;
+                note = `⚠️ 本月 $150 額外回贈已達上限，僅享 0.5% 基本回贈。`;
             } else {
                 let maxExtraSpend = availableExtra / 0.035;
                 if (amountHKD > maxExtraSpend) {
@@ -551,8 +559,9 @@
         }
 
         if (card.id === "hsbc_everymile") {
-            expectedRebate = amountHKD * 0.02; // 保守計算均為 2%
-            return { rebate: expectedRebate, note: "" };
+            // 基本為 2%。指定消費才 5%，系統目前無法精確區分咖啡/交通
+            expectedRebate = amountHKD * 0.02; 
+            return { rebate: expectedRebate, note: "💡 系統保守以基本簽賬 2% 計算。若是指定日常消費 (如交通/咖啡) 則高達 5% 回贈！" };
         }
 
         return { rebate: 0, note: "" };
@@ -592,7 +601,7 @@
             });
         });
 
-        // 按回贈金額從高到低排序
+        // 確保所有信用卡都會出現，且按回贈金額由高至低排列
         currentCalculationResults.sort((a, b) => b.calculatedRebate - a.calculatedRebate);
         renderResults();
     }
@@ -602,7 +611,6 @@
         container.innerHTML = "";
         document.getElementById('resultsArea').style.display = "block";
 
-        // 移除 slice 限制，顯示所有信用卡
         currentCalculationResults.forEach((res, index) => {
             const isBest = index === 0;
             const cardDiv = document.createElement('div');
@@ -615,7 +623,8 @@
                 let isWarn = res.warningNote.includes('⚠️') || res.warningNote.includes('❌');
                 let bg = isWarn ? 'rgba(255, 59, 48, 0.1)' : 'rgba(52, 199, 89, 0.1)';
                 let col = isWarn ? 'var(--red)' : 'var(--green)';
-                conditionsHtml += `<div class="card-conditions" style="background: ${bg}; color: ${col};"><span></span><span>${res.warningNote}</span></div>`;
+                let icon = isWarn ? '<span></span>' : '<span>💡</span>';
+                conditionsHtml += `<div class="card-conditions" style="background: ${bg}; color: ${col};">${icon}<span>${res.warningNote}</span></div>`;
             }
 
             cardDiv.innerHTML = `
@@ -776,6 +785,7 @@
             tx.details = newDetails;
             
             let cardObj = cardsDB.find(c => c.id === newCardId);
+            // 重新計算時排除這筆交易自己的舊記錄
             let calc = calculateRebateForCard(cardObj, tx.category, tx.amountHKD, tx.currency, txDateObj, tx.id);
             tx.rebateEarned = calc.rebate;
 
