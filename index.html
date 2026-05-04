@@ -46,49 +46,19 @@
         .view-section { display: none; }
         .view-section.active { display: block; }
 
-        /* Form & Cards (Updated for iOS Right Alignment) */
+        /* Form & Cards (iOS Right Alignment) */
         .form-group { background: var(--card-bg); border-radius: 10px; overflow: hidden; margin-bottom: 10px; }
         .form-row { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border-color); }
         .form-row:last-child { border-bottom: none; }
         .form-row label { width: 80px; font-size: 17px; flex-shrink: 0; color: var(--text-main); }
         
-        /* 核心修復：使用 Wrapper 強制內容靠右 */
-        .input-wrapper {
-            flex: 1;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            width: 100%;
-        }
+        .input-wrapper { flex: 1; display: flex; justify-content: flex-end; align-items: center; width: 100%; }
         
-        .form-row input, .form-row select { 
-            border: none; 
-            font-size: 17px; 
-            background: transparent; 
-            outline: none; 
-            text-align: right; 
-            color: var(--blue); 
-            appearance: none; 
-            -webkit-appearance: none; 
-            padding: 0; 
-            margin: 0; 
-        }
-        
-        /* Date 與 Select 縮放至內容大小，讓 Wrapper 將其推向最右 */
-        .form-row select, .form-row input[type="date"] {
-            width: auto;
-            max-width: 100%;
-            text-align-last: right;
-        }
-        
-        /* 文字與數字輸入框保持全寬以方便點擊 */
-        .form-row input[type="number"], .form-row input[type="text"] {
-            width: 100%;
-        }
-
+        .form-row input, .form-row select { border: none; font-size: 17px; background: transparent; outline: none; text-align: right; color: var(--blue); appearance: none; -webkit-appearance: none; padding: 0; margin: 0; }
+        .form-row select, .form-row input[type="date"] { width: auto; max-width: 100%; text-align-last: right; }
+        .form-row input[type="number"], .form-row input[type="text"] { width: 100%; }
         .form-row input::placeholder { color: var(--text-secondary); opacity: 0.6; text-align: right; }
         
-        /* iOS Date Input 深層元件對齊修復 */
         input[type="date"]::-webkit-date-and-time-value { text-align: right; }
         input[type="date"]::-webkit-datetime-edit { display: flex; justify-content: flex-end; padding: 0; }
         
@@ -273,6 +243,7 @@
     let exchangeRates = { HKD: 1, CNY: 1.08, USD: 7.8, JPY: 0.052, EUR: 8.4, GBP: 9.8 };
     const catNames = { dining: "餐飲", online: "網購", supermarket: "超市", overseas: "海外", general: "一般" };
 
+    // 包含 11 張熱門信用卡的資料庫
     const cardsDB = [
         {
             id: "boc_chill", name: "中銀 Chill Card",
@@ -293,10 +264,22 @@
             limits: { type: "monthly_total_cap", amount: 3750, overflowRate: 0.004 }
         },
         {
+            id: "ccb_eye", name: "建行(亞洲) eye 信用卡",
+            rates: { online: 0.02, dining: 0.02, supermarket: 0.02, general: 0.02, overseas: 0.02 },
+            conditions: "(假設使用 Visa payWave/Apple Pay/網購) 享 2% 回贈 (5X積分)。每年額外回贈上限簽$75,000。",
+            limits: { type: "yearly_total_cap", amount: 75000, overflowRate: 0.004 }
+        },
+        {
             id: "hsbc_vs", name: "HSBC Visa Signature",
             rates: { dining: 0.036, online: 0.004, supermarket: 0.004, overseas: 0.004, general: 0.004 },
             conditions: "假設『最紅自主獎賞』全投餐飲。餐飲享3.6% (9X獎賞錢)，全年上限簽$100,000。",
             limits: { type: "yearly_cat_cap", category: "dining", amount: 100000, overflowRate: 0.004 }
+        },
+        {
+            id: "hsbc_everymile", name: "滙豐 EveryMile 信用卡",
+            rates: { dining: 0.02, online: 0.02, overseas: 0.02, supermarket: 0.02, general: 0.02 },
+            conditions: "基本簽賬$5/里(約2%)。指定日常消費(如交通/咖啡/串流)$2/里(約5%)。以1里=HK$0.1等值計算。",
+            limits: { type: "none" }
         },
         {
             id: "scb_cathay", name: "渣打國泰 Mastercard",
